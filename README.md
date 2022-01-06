@@ -1,23 +1,84 @@
-# Releasing Open Source
+# rebasedata-php-client
 
-You want to release something as open source? Awesome! It's up to you to get it ready, but don't worry, you are never alone. Open a [new issue](issues/new?template=new-release.md) to get started. [Consider these questions as you start to open source the project.](docs/key-questions-for-choosing-projects.md)
+Introduction
+------------
 
-## What should be open source?
+This code allows to read mdb files using PHP.
 
-It's easier to answer this question in terms of what should **not** be open sourced:
+Dependencies
+------------
 
-1. Don't open source anything that represents core business value.  If it makes us lots of money by being closed source, don't open source it.
-2. Don't open source anything that is specific to internal processes. If it won't be useful to anyone that doesn't work here, don't open source it.
-3. Don't open source anything you can't commit to maintaining long-term. Some projects are inherently difficult to maintain. If you don't want to spend time accepting contributions and working with the open source community, don't open source it.
+PHP ODBC module
+In Linux this is achieved by intalling the ``php5-odbc`` package::
 
-## Open Source Maintainer Expectations
+    php -i | grep PDO
+    # PDO
+    # PDO support => enabled
+    # PDO drivers => mysql, odbc
+    # PDO Driver for MySQL => enabled
+    # PDO_ODBC
+    # PDO Driver for ODBC (unixODBC) => enabled
 
-Before you open source your project, consider the effort required to maintain it. Being an great open source maintainer requires more effort than managing a closed source project. Read our [Maintainer Guide](docs/maintainers-guide.md) to understand what will be expected of you.
+In Windows, typical PHP installation contains ODBC support.
 
-## FAQ
+Installation
+------------
 
-#### Who owns the code I contribute to open source projects?
+To use this, you need `PHP`, `APACHE`, `php-pdo`.   
+
+1. To install `php-obdc` and `odbc-mdbtools` in linux, run the following command:
+
+    ```bash
+   sudo apt install php5-odbc
+   sudo apt install odbc-mdbtools
+    ```
+
+
+Examples
+--------
+
+At first, you need to define one or more input files for the database conversion.
+
+```php
+$user = '';
+$password = '';
+$data = [];
+$driver = null;
+$mdbFile = 'data.mdb';
+// Current OS system
+$os = current(explode(" ",php_uname()));
+
+switch ($os){
+    case 'Windows':
+        $driver = '{Microsoft Access Driver (*.mdb)}';
+        break;
+    case 'Linux':
+        $driver = 'MDBTools';
+        break;
+    default:
+        echo "Don't know about this OS";
+}
+
+// Connection String
+$dataSourceName = "odbc:Driver=$driver;DBQ=$mdbFile;";
+
+// PDO init connection
+$connection = new \PDO($dataSourceName);
+
+// Simple query string
+$query = 'SELECT * FROM tablaName';
+
+// Fetch results
+$tablaNames = $connection->query($query)->fetchAll(\PDO::FETCH_OBJ);
+
+foreach ($tablaNames as $key => $tablaName) {
+    echo sprintf('FieldNameValue: %s', $tablaName->fieldNameValue.PHP_EOL);
+}
+
+// var_dump($tablaNames);
+```
+## Feedback
+We love to get feedback from you! Did you discover a bug? Do you need an additional feature? Open an issue on Github and RebaseData will try to resolve your issue as soon as possible! Thanks in advance for your feedback!
 
 ## License
-
-This repository is licensed under [CC-BY-4.0](../LICENSE) (c) 2019 GitHub, Inc.
+This code is licensed under the [MIT license](https://opensource.org/licenses/MIT).
